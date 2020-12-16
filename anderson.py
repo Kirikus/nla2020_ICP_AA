@@ -1,7 +1,7 @@
 import numpy, scipy
 from scipy.linalg import lstsq
 
-def anderson(F, x, memory = 10, delay = 0, maxiter = 100, alpha_limit = None, alpha0_min = None):
+def anderson(F, x, memory = 10, delay = 0, maxiter = 100, alpha_limit = None, alpha0_min = None, callback = None):
     memory = min(memory, maxiter)
     U = numpy.zeros((x.size, memory))
     R = numpy.zeros((x.size, memory))
@@ -15,6 +15,8 @@ def anderson(F, x, memory = 10, delay = 0, maxiter = 100, alpha_limit = None, al
         n = min(memory - 1, k)
         G[:, n] = F(U[:, n])
         R[:, n] = G[:, n] - U[:, n]
+        if callback:
+            callback(U[:, n], R[:, n])
         alphas[1:n + 1] = lstsq((-R[:, 1:n + 1] + R[:, 0:1]),R[:, 0])[0]
         alphas[0] = 1 - alphas[1:n + 1].sum()
         
@@ -57,4 +59,6 @@ if __name__ == "__main__":
     x0 = numpy.zeros(10)
     # Root
     x_star = numpy.array(range(x0.size))
-    print("Residual = %s" % numpy.linalg.norm(x_star -  anderson(F, x0, maxiter = 30)))
+    xs = []
+    callback = (lambda x,r,xs=xs : xs.append(x))
+    print("Residual = %s" % numpy.linalg.norm(x_star -  anderson(F, x0, maxiter = 30, callback=callback)))
