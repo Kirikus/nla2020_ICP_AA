@@ -7,6 +7,12 @@ def anderson(F, x, memory = 10, delay = 0, maxiter = 100, alpha_limit = None, al
     R = numpy.zeros((x.size, memory))
     G = numpy.zeros((x.size, memory))
     alphas = numpy.zeros((memory))
+    for _ in range(delay):
+        x_old = x
+        x = F(x)
+        maxiter = maxiter - 1
+        if callback:
+            callback(x, x_old - x)
     U[:, 0] = x
     U[:, 1] = G[:, 0] = F(U[:, 0])
     R[:, 0] = U[:, 1] - U[:, 0]
